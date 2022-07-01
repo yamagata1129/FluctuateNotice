@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
         // WorkManagerへの登録
         PeriodicWorkRequest notificationWorkRequest =
-                new PeriodicWorkRequest.Builder(NotificationWorker.class, 30, TimeUnit.MINUTES)
+                new PeriodicWorkRequest.Builder(NotificationWorker.class, 1, TimeUnit.DAYS)
                         .addTag(DEBUG_TAG)
                         .setInitialDelay(delay_time, TimeUnit.MINUTES)
                         .build();
