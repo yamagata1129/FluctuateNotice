@@ -118,7 +118,7 @@ public class NotificationWorker extends Worker {
             // select id="tablefix1" and each row input element
             Elements table_rows = doc.select("#tablefix1 tr");
             // 日付を指定してdoc_rowsの中から必要な行だけ取り出す
-            Elements tds_yesterdays = table_rows.get(day+2).getElementsByTag("td");
+            Elements tds_yesterdays = table_rows.get(day+3).getElementsByTag("td");
             high_tmp_before = Double.parseDouble(tds_yesterdays.get(7).text());
             low_tmp_before = Double.parseDouble(tds_yesterdays.get(8).text());
         } catch (IOException e){
