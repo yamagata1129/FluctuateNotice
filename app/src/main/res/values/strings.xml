@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">今日の気温</string>
+    <string name="pref_name">県名</string>
+    <string name="pref_position">県番号</string>
+    <string name="notice_time">通知時間</string>
+    <string name="notice_status">通知状態</string>
+</resources>
