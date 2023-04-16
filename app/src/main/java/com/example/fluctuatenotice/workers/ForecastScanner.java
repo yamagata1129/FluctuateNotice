@@ -15,14 +15,13 @@ import java.util.List;
 public class ForecastScanner {
     private static final String DEBUG_TAG = "TEMPERATURE";
 
-    // We don't use namespaces
     private static final String ns = null;
 
-    public double[] parse(InputStream in) throws XmlPullParserException, IOException {
+    public float[] parse(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(in, null);
+            parser.setInput(in, "UTF-8");
             parser.nextTag();
             return readInfo(parser);
         } finally {
@@ -42,7 +41,7 @@ public class ForecastScanner {
         }
     }
 
-    private double[] readInfo(XmlPullParser parser) throws XmlPullParserException, IOException{
+    private float[] readInfo(XmlPullParser parser) throws XmlPullParserException, IOException{
         List<Item> items = new ArrayList<>();
 
         // Itemタグが見つかるまで何度も階層を下げる
@@ -92,13 +91,13 @@ public class ForecastScanner {
         }
 
         // 地点予報が２箇所存在するので、現在のフィードにあわせ１個目のみを解析
-        List<Double> temperatures = new ArrayList<>();
+        List<Float> temperatures = new ArrayList<>();
         for(int i=0; i<items.get(0).temp_list.size(); i++){
             temperatures.add(items.get(0).temp_list.get(i).temperature);
         }
-        double high_temperature = Collections.max(temperatures);
-        double low_temperature = Collections.min(temperatures);
-        double[] high_low_temperature = {high_temperature, low_temperature};
+        float high_temperature = Collections.max(temperatures);
+        float low_temperature = Collections.min(temperatures);
+        float[] high_low_temperature = {high_temperature, low_temperature};
 
         Log.d(DEBUG_TAG, high_temperature+", "+low_temperature);
 
@@ -138,17 +137,16 @@ public class ForecastScanner {
                 skip(parser);
             }
         }
-        Item item = new Item(name, code, temp_list);
-        return item;
+        return new Item(name, code, temp_list);
 
     }
 
     // 気温の取得
     public static class Temperature{
         public final String type;
-        public final double temperature;
+        public final float temperature;
 
-        public Temperature(String type, double temperature){
+        public Temperature(String type, float temperature){
             this.type = type;
             this.temperature = temperature;
         }
@@ -156,7 +154,7 @@ public class ForecastScanner {
 
     private Temperature readProperty(XmlPullParser parser) throws XmlPullParserException, IOException{
 
-        Temperature temperature = new Temperature("初期値", 0.0);
+        Temperature temperature = new Temperature("初期値", 0.0f);
 
         parser.require(XmlPullParser.START_TAG, ns, "Property");
         while(parser.next()!=XmlPullParser.END_TAG){
@@ -176,7 +174,7 @@ public class ForecastScanner {
 
     private Temperature readTemperaturePart(XmlPullParser parser) throws XmlPullParserException, IOException{
 
-        double temperature = 0.0;
+        float temperature = 0.0f;
         String type = "";
 
         parser.require(XmlPullParser.START_TAG, ns, "TemperaturePart");
@@ -192,14 +190,13 @@ public class ForecastScanner {
                 skip(parser);
             }
         }
-        Temperature temperature_set = new Temperature(type, temperature);
-        return temperature_set;
+        return new Temperature(type, temperature);
 
     }
 
-    private double readJmx_eb(XmlPullParser parser) throws XmlPullParserException, IOException{
+    private float readJmx_eb(XmlPullParser parser) throws XmlPullParserException, IOException{
         parser.require(XmlPullParser.START_TAG, ns, "jmx_eb:Temperature");
-        double temperature = Double.parseDouble(readText(parser));
+        float temperature = Float.parseFloat(readText(parser));
         parser.require(XmlPullParser.END_TAG, ns, "jmx_eb:Temperature");
         return temperature;
     }
@@ -224,8 +221,7 @@ public class ForecastScanner {
             }
         }
 
-        String[] station = {name, code};
-        return station;
+        return new String[]{name, code};
 
     }
 

@@ -14,18 +14,18 @@ import java.util.List;
 public class StationSetting {
     private static final String DEBUG_TAG = "STATION_SETTING";
 
-    // We don't use namespaces
     private static final String ns = null;
 
-    private String forecast_URL = null;
-    private String station_name = null;
+    private String forecast_URL;
+    private String station_name;
 
     public String parse(InputStream in, String station_name) throws XmlPullParserException, IOException {
         this.station_name = station_name;
+        forecast_URL = null;
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(in, null);
+            parser.setInput(in, "utf-8");
             parser.nextTag();
             forecast_URL = readFeed(parser);
             return forecast_URL;
@@ -34,15 +34,15 @@ public class StationSetting {
         }
     }
 
+    /*
+    read**()の基本動作
+    開始**タグから終了**タグまでを順に読み取る
+    途中、読み取りたい子タグが出てきたらそのメソッドへ移行（最下層のタグであればreadText()にてテキストを取得）
+    無視するタグはskip()で読み飛ばす
+     */
     private String readFeed(XmlPullParser parser) throws XmlPullParserException, IOException{
         List<Entry> entries = new ArrayList<>();
-        forecast_URL = "";
 
-        /*  read**()の基本動作
-            開始**タグから終了**タグまでを順に読み取る
-            途中、読み取りたい子タグが出てきたらそのメソッドへ移行（最下層のタグであればreadText()にてテキストを取得）
-            無視するタグはskip()で読み飛ばす
-         */
         parser.require(XmlPullParser.START_TAG, ns, "feed");
         // XMLフィードよりエントリー（観測データ名、アメダス地点名、アメダス地点コード）を取得
         while(parser.next()!=XmlPullParser.END_TAG){
@@ -62,6 +62,10 @@ public class StationSetting {
                 if(entries.get(i).author.equals(station_name)) {
                     forecast_URL = entries.get(i).id;
                 }
+            }
+            /* 追加部分：最新のレコードのみ取得 */
+            if (forecast_URL!=null){
+                break;
             }
         }
         Log.d(DEBUG_TAG, station_name+", "+forecast_URL);
@@ -90,8 +94,8 @@ public class StationSetting {
                 skip(parser);
             }
         }
-        Entry entry = new Entry(title, id, author);
-        return entry;
+
+        return new Entry(title, id, author);
     }
 
     public static class Entry{
