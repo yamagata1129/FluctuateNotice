@@ -1,6 +1,5 @@
 package com.example.fluctuatenotice;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -14,10 +13,13 @@ import com.example.fluctuatenotice.prefData.PrefData;
 
 public class ListView_PrefSetting extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
+    private int selected_position;
+    private String selected_pref;
     private static final String[] pref_name = PrefData.pref_name;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         ListView listView = new ListView(this);
@@ -25,21 +27,30 @@ public class ListView_PrefSetting extends AppCompatActivity implements AdapterVi
 
         ArrayAdapter<String> arrayAdapter =
                 new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, pref_name);
-
         listView.setAdapter(arrayAdapter);
         listView.setOnItemClickListener(this);
-        getIntent();
+
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-        // 設定ファイルを更新しMainActivityを再生成
-        getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE).edit()
-                .putString(getString(R.string.pref_name), pref_name[position])
-                .putInt(getString(R.string.pref_position), position)
-                .apply();
-        Intent intent = new Intent(this.getApplicationContext(), MainActivity.class);
-        startActivity(intent);
+        selected_position = position;
+        selected_pref = pref_name[position];
+        finish();
     }
 
+    @Override
+    public void finish() {
+        int result;
+        if(selected_pref==null){
+            result = RESULT_CANCELED;
+        } else {
+            result = RESULT_OK;
+        }
+        Intent intent = new Intent();
+        intent.putExtra(getString(R.string.from_preflist_name), selected_pref);
+        intent.putExtra(getString(R.string.from_preflist_position), selected_position);
+        setResult(result, intent);
+        super.finish();
+    }
 }
